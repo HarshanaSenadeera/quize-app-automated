@@ -36,13 +36,13 @@ jobs:
 
           CHANGED_SERVICES=""
 
-          if echo "$CHANGED_FILES" | grep -q "question-app/"; then
+          if echo "$CHANGED_FILES" | grep -q "distributed-quiz-service/question-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES question-app"
           fi
-          if echo "$CHANGED_FILES" | grep -q "submit-app/"; then
+          if echo "$CHANGED_FILES" | grep -q "distributed-quiz-service/submit-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES submit-app"
           fi
-          if echo "$CHANGED_FILES" | grep -q "db/"; then
+          if echo "$CHANGED_FILES" | grep -q "distributed-quiz-service/db/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES db"
           fi
 
@@ -53,19 +53,19 @@ jobs:
         if: contains(env.CHANGED_SERVICES, 'question-app')
         run: |
           echo "Building and pushing Question App..."
-          docker build -t harshanasenadeera/question-app:latest ./question-app
+          docker build -t harshanasenadeera/question-app:latest ./distributed-quiz-service/question-app
           docker push harshanasenadeera/question-app:latest
 
       - name: Build and Push Submit App (if changed)
         if: contains(env.CHANGED_SERVICES, 'submit-app')
         run: |
           echo "Building and pushing Submit App..."
-          docker build -t harshanasenadeera/submit-app:latest ./submit-app
+          docker build -t harshanasenadeera/submit-app:latest ./distributed-quiz-service/submit-app
           docker push harshanasenadeera/submit-app:latest
 
       - name: Build and Push Database (if changed)
         if: contains(env.CHANGED_SERVICES, 'db')
         run: |
           echo "Building and pushing Database..."
-          docker build -t harshanasenadeera/db:latest ./db
+          docker build -t harshanasenadeera/db:latest ./distributed-quiz-service/db
           docker push harshanasenadeera/db:latest
