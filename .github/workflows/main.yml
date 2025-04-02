@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master  # Runs only on the main branch push
+      - master  # Runs only on the master branch push
 
 jobs:
   build-and-push:
@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "Checking for changes..."
           CHANGED_SERVICES=""
-          
+
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "question-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES question-app"
           fi
@@ -38,17 +38,23 @@ jobs:
       - name: Build and Push Question App (if changed)
         if: contains(env.CHANGED_SERVICES, 'question-app')
         run: |
-          docker build -t harshanasenadeera/question-app:latest ./question-app
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          docker build -t harshanasenadeera/question-app:latest -t harshanasenadeera/question-app:$IMAGE_TAG ./question-app
           docker push harshanasenadeera/question-app:latest
+          docker push harshanasenadeera/question-app:$IMAGE_TAG
 
       - name: Build and Push Submit App (if changed)
         if: contains(env.CHANGED_SERVICES, 'submit-app')
         run: |
-          docker build -t your-dockerhub-username/submit-app:latest ./submit-app
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          docker build -t harshanasenadeera/submit-app:latest -t harshanasenadeera/submit-app:$IMAGE_TAG ./submit-app
           docker push harshanasenadeera/submit-app:latest
+          docker push harshanasenadeera/submit-app:$IMAGE_TAG
 
       - name: Build and Push Database (if changed)
         if: contains(env.CHANGED_SERVICES, 'db')
         run: |
-          docker build -t harshanasenadeera/db:latest ./db
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          docker build -t harshanasenadeera/db:latest -t harshanasenadeera/db:$IMAGE_TAG ./db
           docker push harshanasenadeera/db:latest
+          docker push harshanasenadeera/db:$IMAGE_TAG
