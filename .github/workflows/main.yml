@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # Ensures at least 2 commits exist to compare changes
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -24,19 +26,23 @@ jobs:
         run: |
           echo "Checking for changes..."
           
-          # Debugging: Print changed files
-          echo "Files changed:"
-          git diff --name-only HEAD^ HEAD
+          # Fetch full commit history if needed
+          git fetch --unshallow || true  # Ignores error if already fully fetched
+
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+
+          echo "Files changed: $CHANGED_FILES"
 
           CHANGED_SERVICES=""
 
-          if git diff --name-only HEAD^ HEAD | grep -q "question-app/"; then
+          if echo "$CHANGED_FILES" | grep -q "question-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES question-app"
           fi
-          if git diff --name-only HEAD^ HEAD | grep -q "submit-app/"; then
+          if echo "$CHANGED_FILES" | grep -q "submit-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES submit-app"
           fi
-          if git diff --name-only HEAD^ HEAD | grep -q "db/"; then
+          if echo "$CHANGED_FILES" | grep -q "db/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES db"
           fi
 
