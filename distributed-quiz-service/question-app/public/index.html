@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Question App</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Multiple Choice Quiz</h1>
+      <p>Test your knowledge with random questions!</p>
+    </header>
+    <main>
+      <div class="category-selector">
+        <label for="category">Choose a Category:</label>
+        <select id="category" class="modern-select"></select>
+        <button onclick="getQuestion()" class="modern-btn">Get Question</button>
+      </div>
+      <div id="question" class="question-box"></div>
+      <div id="answers" class="answers-grid"></div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

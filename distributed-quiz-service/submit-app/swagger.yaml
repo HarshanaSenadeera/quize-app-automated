@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Submit Application API
+  version: 1.0.0
+  description: API for submitting quiz questions
+paths:
+  /categories:
+    get:
+      summary: Get list of categories
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Server error
+  /submit:
+    post:
+      summary: Submit a new question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                answers:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 4
+                  maxItems: 4
+                correctAnswer:
+                  type: string
+                category:
+                  type: string
+                newCategory:
+                  type: string
+              required:
+                - question
+                - answers
+                - correctAnswer
+      responses:
+        '201':
+          description: Question submitted successfully
+        '400':
+          description: Invalid input
+        '500':
+          description: Server error
