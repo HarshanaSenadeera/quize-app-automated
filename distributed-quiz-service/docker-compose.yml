@@ -40,33 +40,40 @@ version: '3.8'
 services:
   question-app:
     build: ./question-app
+    container_name: question-service
     ports:
       - "3000:3000"
     networks:
       - quiz-network
     depends_on:
       db:
-        condition: service_healthy  # Wait for DB to be healthy
+        condition: service_healthy
+    volumes:
+      - question-data:/app/data
 
   submit-app:
     build: ./submit-app
+    container_name: submit-service
     ports:
       - "4000:4000"
     networks:
       - quiz-network
     depends_on:
       db:
-        condition: service_healthy  # Wait for DB to be healthy
+        condition: service_healthy
+    volumes:
+      - submit-data:/app/data
 
   db:
     build: ./db
+    container_name: quiz-database
     volumes:
-      - quiz-data:/var/lib/mysql
+      - quiz-db-data:/var/lib/mysql
     networks:
       - quiz-network
     expose:
       - "3306"
-    healthcheck:  # Add health check for MySQL
+    healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 10s
       timeout: 5s
@@ -77,4 +84,9 @@ networks:
     driver: bridge
 
 volumes:
-  quiz-data:
+  quiz-db-data:
+    name: quiz_database_storage
+  question-data:
+    name: question_service_storage
+  submit-data:
+    name: submit_service_storage

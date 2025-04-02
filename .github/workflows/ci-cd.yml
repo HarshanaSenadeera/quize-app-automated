@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Runs only on the main branch push
+
+jobs:
+  build-and-push:
+    name: Build and Push to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Detect Changed Services
+        id: changed-services
+        run: |
+          echo "Checking for changes..."
+          CHANGED_SERVICES=""
+          
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "question-app/"; then
+            CHANGED_SERVICES="$CHANGED_SERVICES question-app"
+          fi
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "submit-app/"; then
+            CHANGED_SERVICES="$CHANGED_SERVICES submit-app"
+          fi
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "db/"; then
+            CHANGED_SERVICES="$CHANGED_SERVICES db"
+          fi
+
+          echo "Changed Services: $CHANGED_SERVICES"
+          echo "CHANGED_SERVICES=$CHANGED_SERVICES" >> $GITHUB_ENV
+
+      - name: Build and Push Question App (if changed)
+        if: contains(env.CHANGED_SERVICES, 'question-app')
+        run: |
+          docker build -t harshanasenadeera/question-app:latest ./question-app
+          docker push harshanasenadeera/question-app:latest
+
+      - name: Build and Push Submit App (if changed)
+        if: contains(env.CHANGED_SERVICES, 'submit-app')
+        run: |
+          docker build -t your-dockerhub-username/submit-app:latest ./submit-app
+          docker push harshanasenadeera/submit-app:latest
+
+      - name: Build and Push Database (if changed)
+        if: contains(env.CHANGED_SERVICES, 'db')
+        run: |
+          docker build -t harshanasenadeera/db:latest ./db
+          docker push harshanasenadeera/db:latest
