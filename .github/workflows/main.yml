@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master  # Runs only on master branch push
+      - master  # Runs only on the master branch push
 
 jobs:
   build-and-push:
@@ -23,8 +23,13 @@ jobs:
         id: changed-services
         run: |
           echo "Checking for changes..."
-          CHANGED_SERVICES=""
           
+          # Debugging: Print changed files
+          echo "Files changed:"
+          git diff --name-only HEAD^ HEAD
+
+          CHANGED_SERVICES=""
+
           if git diff --name-only HEAD^ HEAD | grep -q "question-app/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES question-app"
           fi
@@ -35,26 +40,26 @@ jobs:
             CHANGED_SERVICES="$CHANGED_SERVICES db"
           fi
 
-          echo "Changed Services: $CHANGED_SERVICES"
+          echo "Detected Changes: $CHANGED_SERVICES"
           echo "CHANGED_SERVICES=$CHANGED_SERVICES" >> $GITHUB_ENV
 
       - name: Build and Push Question App (if changed)
         if: contains(env.CHANGED_SERVICES, 'question-app')
         run: |
-          IMAGE_TAG=$(git rev-parse --short HEAD)
-          docker build --no-cache -t harshanasenadeera/question-app:latest -t harshanasenadeera/question-app:$IMAGE_TAG ./question-app
-          docker push --all-tags harshanasenadeera/question-app
+          echo "Building and pushing Question App..."
+          docker build -t harshanasenadeera/question-app:latest ./question-app
+          docker push harshanasenadeera/question-app:latest
 
       - name: Build and Push Submit App (if changed)
         if: contains(env.CHANGED_SERVICES, 'submit-app')
         run: |
-          IMAGE_TAG=$(git rev-parse --short HEAD)
-          docker build --no-cache -t harshanasenadeera/submit-app:latest -t harshanasenadeera/submit-app:$IMAGE_TAG ./submit-app
-          docker push --all-tags harshanasenadeera/submit-app
+          echo "Building and pushing Submit App..."
+          docker build -t harshanasenadeera/submit-app:latest ./submit-app
+          docker push harshanasenadeera/submit-app:latest
 
       - name: Build and Push Database (if changed)
         if: contains(env.CHANGED_SERVICES, 'db')
         run: |
-          IMAGE_TAG=$(git rev-parse --short HEAD)
-          docker build --no-cache -t harshanasenadeera/db:latest -t harshanasenadeera/db:$IMAGE_TAG ./db
-          docker push --all-tags harshanasenadeera/db
+          echo "Building and pushing Database..."
+          docker build -t harshanasenadeera/db:latest ./db
+          docker push harshanasenadeera/db:latest
