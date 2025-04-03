@@ -87,7 +87,8 @@ jobs:
 
       - name: Install ELT Dependencies
         run: |
-          pip install pandas sqlalchemy psycopg2-binary || exit 1
+          pip install pandas sqlalchemy psycopg2-binary pymysql
+    
 
       - name: Extract Data from Database
         run: |
