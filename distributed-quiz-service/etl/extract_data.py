@@ -2,7 +2,7 @@ import pandas as pd
 import sqlalchemy
 
 # Database connection details
-DB_URI = "mysql+pymysql://root:root1234@localhost:3307/quiz_db"
+DB_URI = "mysql+pymysql://root:1234@localhost:3307/quiz_db"
 
 
 # Extract data
