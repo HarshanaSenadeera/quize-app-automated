@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2  # Ensures at least 2 commits exist to compare changes
+          fetch-depth: 2
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -25,13 +25,8 @@ jobs:
         id: changed-services
         run: |
           echo "Checking for changes..."
-          
-          # Fetch full commit history if needed
-          git fetch --unshallow || true  # Ignores error if already fully fetched
-
-          # Get changed files
+          git fetch --unshallow || true
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-
           echo "Files changed: $CHANGED_FILES"
 
           CHANGED_SERVICES=""
@@ -44,6 +39,9 @@ jobs:
           fi
           if echo "$CHANGED_FILES" | grep -q "distributed-quiz-service/db/"; then
             CHANGED_SERVICES="$CHANGED_SERVICES db"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "distributed-quiz-service/etl/"; then
+            CHANGED_SERVICES="$CHANGED_SERVICES etl"
           fi
 
           echo "Detected Changes: $CHANGED_SERVICES"
@@ -69,3 +67,36 @@ jobs:
           echo "Building and pushing Database..."
           docker build -t harshanasenadeera/db:latest ./distributed-quiz-service/db
           docker push harshanasenadeera/db:latest
+
+  elt-pipeline:
+    name: ELT Pipeline Execution
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: contains(env.CHANGED_SERVICES, 'etl')
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install ELT Dependencies
+        run: |
+          pip install pandas sqlalchemy psycopg2-binary
+
+      - name: Extract Data from Database
+        run: |
+          python distributed-quiz-service/etl/extract_data.py
+
+      - name: Load Data into Data Warehouse
+        run: |
+          python distributed-quiz-service/etl/load_data.py
+
+      - name: Transform Data for Analysis
+        run: |
+          python distributed-quiz-service/etl/transform_data.py
+
+      - name: Verify ELT Completion
+        run: echo "ELT Pipeline completed successfully!"
