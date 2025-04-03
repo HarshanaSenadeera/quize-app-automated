@@ -34,7 +34,7 @@ services:
     networks:
       - quiz-network
     ports:
-      - "3306:3306"  # Expose port 3306 to the host
+      - "3307:3306"  # Expose port 3306 to the host
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 10s
