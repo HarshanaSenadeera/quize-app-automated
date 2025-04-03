@@ -1,41 +1,3 @@
-# version: '3.8'
-# services:
-#   question-app:
-#     build: ./question-app
-#     ports:
-#       - "3000:3000"
-#     networks:
-#       - quiz-network
-#     depends_on:
-#       - db
-
-#   submit-app:
-#     build: ./submit-app
-#     ports:
-#       - "4000:4000"
-#     networks:
-#       - quiz-network
-#     depends_on:
-#       - db
-
-#   db:
-#     build: ./db
-#     volumes:
-#       - quiz-data:/var/lib/mysql
-#     networks:
-#       - quiz-network
-#     expose:
-#       - "3306"
-
-# networks:
-#   quiz-network:
-#     driver: bridge
-
-# volumes:
-#   quiz-data:
-
-
-
 version: '3.8'
 services:
   question-app:
@@ -71,8 +33,8 @@ services:
       - quiz-db-data:/var/lib/mysql
     networks:
       - quiz-network
-    expose:
-      - "3306"
+    ports:
+      - "3306:3306"  # Expose port 3306 to the host
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 10s
