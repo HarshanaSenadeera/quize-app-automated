@@ -80,12 +80,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Start MySQL container
       - name: Set up MySQL container
-        uses: docker/setup-buildx-action@v2
-        with:
-          version: latest
-
-      - name: Run MySQL service in a Docker container
         run: |
           docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=root1234 -e MYSQL_DATABASE=quiz_db -d mysql:5.7
 
@@ -96,10 +92,11 @@ jobs:
 
       - name: Install ELT Dependencies
         run: |
-          pip install pandas sqlalchemy psycopg2-binary pymysql
+          pip install pandas sqlalchemy pymysql
 
       - name: Extract Data from Database
         run: |
+          # Update the DB_URI to match the Docker container
           python distributed-quiz-service/etl/extract_data.py
 
       - name: Verify ELT Completion
