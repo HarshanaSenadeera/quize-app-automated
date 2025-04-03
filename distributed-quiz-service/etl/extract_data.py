@@ -11,7 +11,7 @@ def extract_data():
     query = "SELECT * FROM quiz_results"
     df = pd.read_sql(query, engine)
     df.to_csv("extracted_data.csv", index=False)
-    print("Data extracted successfully....!")
+    print("Data extracted successfully............!")
 
 if __name__ == "__main__":
     extract_data()
