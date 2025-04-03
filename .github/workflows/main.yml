@@ -47,24 +47,24 @@ jobs:
           fi
 
           echo "Detected Changes: $CHANGED_SERVICES"
-          echo "::set-output name=changed_services::$CHANGED_SERVICES"
+          echo "CHANGED_SERVICES=$CHANGED_SERVICES" >> $GITHUB_ENV
 
       - name: Build and Push Question App (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'question-app')
+        if: contains(env.CHANGED_SERVICES, 'question-app')
         run: |
           echo "Building and pushing Question App..."
           docker build -t harshanasenadeera/question-app:latest ./distributed-quiz-service/question-app
           docker push harshanasenadeera/question-app:latest
 
       - name: Build and Push Submit App (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'submit-app')
+        if: contains(env.CHANGED_SERVICES, 'submit-app')
         run: |
           echo "Building and pushing Submit App..."
           docker build -t harshanasenadeera/submit-app:latest ./distributed-quiz-service/submit-app
           docker push harshanasenadeera/submit-app:latest
 
       - name: Build and Push Database (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'db')
+        if: contains(env.CHANGED_SERVICES, 'db')
         run: |
           echo "Building and pushing Database..."
           docker build -t harshanasenadeera/db:latest ./distributed-quiz-service/db
@@ -74,7 +74,7 @@ jobs:
     name: ELT Pipeline Execution
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: contains(needs.build-and-push.outputs.changed_services, 'etl')
+    if: contains(env.CHANGED_SERVICES, 'etl')
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -83,10 +83,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
+          cache: "pip"  # Speeds up dependencies installation
 
       - name: Install ELT Dependencies
         run: |
-          pip install pandas sqlalchemy psycopg2-binary
+          pip install -r distributed-quiz-service/etl/requirements.txt
 
       - name: Extract Data from Database
         run: |
@@ -101,4 +102,4 @@ jobs:
           python distributed-quiz-service/etl/transform_data.py
 
       - name: Verify ELT Completion
-        run: echo "ELT Pipeline completed successfully!"
+        run: echo "✅ ELT Pipeline completed successfully!"
