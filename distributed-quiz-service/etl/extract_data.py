@@ -20,7 +20,7 @@ def extract_data():
         # Save DataFrame to CSV
         df.to_csv("extracted_data.csv", index=False)
 
-        print("Data extracted successfully!")
+        print("Data extracted successfully....!")
 
     except Exception as e:
         print(f"Error extracting data: {e}")
