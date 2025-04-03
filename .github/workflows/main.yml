@@ -18,7 +18,8 @@ jobs:
           fetch-depth: 2
 
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Verify Docker Login
         run: docker info
@@ -47,24 +48,28 @@ jobs:
           fi
 
           echo "Detected Changes: $CHANGED_SERVICES"
-          echo "::set-output name=changed_services::$CHANGED_SERVICES"
+          echo "changed_services=$CHANGED_SERVICES" >> "$GITHUB_ENV"
+          echo "changed_services=$CHANGED_SERVICES" >> "$GITHUB_OUTPUT"
+
+      - name: Debug Changed Services
+        run: echo "Changed Services: ${{ env.changed_services }}"
 
       - name: Build and Push Question App (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'question-app')
+        if: contains(env.changed_services, 'question-app')
         run: |
           echo "Building and pushing Question App..."
           docker build -t harshanasenadeera/question-app:latest ./distributed-quiz-service/question-app
           docker push harshanasenadeera/question-app:latest
 
       - name: Build and Push Submit App (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'submit-app')
+        if: contains(env.changed_services, 'submit-app')
         run: |
           echo "Building and pushing Submit App..."
           docker build -t harshanasenadeera/submit-app:latest ./distributed-quiz-service/submit-app
           docker push harshanasenadeera/submit-app:latest
 
       - name: Build and Push Database (if changed)
-        if: contains(steps.changed-services.outputs.changed_services, 'db')
+        if: contains(env.changed_services, 'db')
         run: |
           echo "Building and pushing Database..."
           docker build -t harshanasenadeera/db:latest ./distributed-quiz-service/db
