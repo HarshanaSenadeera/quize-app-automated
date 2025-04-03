@@ -10,7 +10,7 @@ jobs:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
     outputs:
-      changed_services: ${{ steps.changed-services.outputs.changed_services }}  # Proper output reference
+      changed_services: ${{ steps.changed-services.outputs.changed_services }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -87,11 +87,11 @@ jobs:
 
       - name: Install ELT Dependencies
         run: |
-          pip install pandas sqlalchemy psycopg2-binary
+          pip install pandas sqlalchemy psycopg2-binary || exit 1
 
       - name: Extract Data from Database
         run: |
-          python distributed-quiz-service/etl/extract_data.py
+          python distributed-quiz-service/etl/extract_data.py || exit 1
 
       - name: Load Data into Data Warehouse
         run: |
