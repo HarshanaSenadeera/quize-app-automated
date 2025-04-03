@@ -9,6 +9,8 @@ jobs:
   build-and-push:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
+    outputs:
+      changed_services: ${{ steps.changed-services.outputs.changed_services }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -45,24 +47,24 @@ jobs:
           fi
 
           echo "Detected Changes: $CHANGED_SERVICES"
-          echo "CHANGED_SERVICES=$CHANGED_SERVICES" >> $GITHUB_ENV
+          echo "::set-output name=changed_services::$CHANGED_SERVICES"
 
       - name: Build and Push Question App (if changed)
-        if: contains(env.CHANGED_SERVICES, 'question-app')
+        if: contains(steps.changed-services.outputs.changed_services, 'question-app')
         run: |
           echo "Building and pushing Question App..."
           docker build -t harshanasenadeera/question-app:latest ./distributed-quiz-service/question-app
           docker push harshanasenadeera/question-app:latest
 
       - name: Build and Push Submit App (if changed)
-        if: contains(env.CHANGED_SERVICES, 'submit-app')
+        if: contains(steps.changed-services.outputs.changed_services, 'submit-app')
         run: |
           echo "Building and pushing Submit App..."
           docker build -t harshanasenadeera/submit-app:latest ./distributed-quiz-service/submit-app
           docker push harshanasenadeera/submit-app:latest
 
       - name: Build and Push Database (if changed)
-        if: contains(env.CHANGED_SERVICES, 'db')
+        if: contains(steps.changed-services.outputs.changed_services, 'db')
         run: |
           echo "Building and pushing Database..."
           docker build -t harshanasenadeera/db:latest ./distributed-quiz-service/db
@@ -72,7 +74,7 @@ jobs:
     name: ELT Pipeline Execution
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: contains(env.CHANGED_SERVICES, 'etl')
+    if: contains(needs.build-and-push.outputs.changed_services, 'etl')
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
