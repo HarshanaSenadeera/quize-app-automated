@@ -1,9 +1,11 @@
 import pandas as pd
 import sqlalchemy
+from sqlalchemy import create_engine
 
 # Database connection details
 DB_URI = "mysql+pymysql://root:1234@quiz-database:3306/quiz_db"
 
+engine = create_engine(DB_URI)
 
 # Extract data
 def extract_data():
