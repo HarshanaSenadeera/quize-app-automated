@@ -10,7 +10,7 @@ jobs:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
     outputs:
-      changed_services: "${{ steps.changed-services.outputs.changed_services }}"  # Fixed output format
+      changed_services: ${{ steps.changed-services.outputs.changed_services }}  # Proper output reference
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -48,10 +48,7 @@ jobs:
           fi
 
           echo "Detected Changes: $CHANGED_SERVICES"
-          echo "changed_services=$CHANGED_SERVICES" >> "$GITHUB_OUTPUT"
-
-      - name: Debug Changed Services
-        run: echo "Changed Services: ${{ steps.changed-services.outputs.changed_services }}"
+          echo "::set-output name=changed_services::$CHANGED_SERVICES"
 
       - name: Build and Push Question App (if changed)
         if: contains(steps.changed-services.outputs.changed_services, 'question-app')
