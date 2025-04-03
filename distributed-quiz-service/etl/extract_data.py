@@ -4,8 +4,6 @@ import sqlalchemy
 # Database connection details
 DB_URI = "mysql+pymysql://root:root1234@quiz-database:3306/quiz_db"
 
-
-
 # Extract data
 def extract_data():
     engine = sqlalchemy.create_engine(DB_URI)

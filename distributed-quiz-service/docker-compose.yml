@@ -33,13 +33,14 @@ services:
       - quiz-db-data:/var/lib/mysql
     networks:
       - quiz-network
-    ports:
-      - "3307:3306"  # Expose port 3306 to the host
+    expose:
+      - "3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
 
 networks:
   quiz-network:
